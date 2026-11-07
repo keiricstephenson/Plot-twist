@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plot Twist</title>
+<meta name="description" content="Get from one movie to another using only 'More like this' links. How fast can you get there?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  /* ====== PASTE YOUR TMDB API KEY BETWEEN THE QUOTES ====== */
+  const TMDB_KEY = "2d4fb4707fe7fddd49ef09a65c6afe31";
+</script>
+<style>
+  :root{
+    --bg:#0d0f14; --panel:#161a22; --panel2:#1d222c; --line:#2a303c;
+    --text:#f2f3f5; --muted:#9aa3b2; --accent:#ffc83d; --good:#3ddc84; --bad:#ff6b6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{min-height:100vh}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  a{color:var(--accent)}
+  .wrap{max-width:760px;margin:0 auto;padding:16px 14px 100px;padding-top:max(16px,env(safe-area-inset-top))}
+  .logo{font-family:"Bebas Neue",sans-serif;font-size:34px;letter-spacing:1.5px;line-height:1}
+  .logo span{color:var(--accent)}
+  .sub{color:var(--muted);font-size:14px;margin-top:4px}
+
+  /* posters */
+  .poster{position:relative;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--panel2);
+    box-shadow:0 6px 18px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08)}
+  .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
+  .poster img.ok{opacity:1}
+  .poster .noimg{position:absolute;inset:0;display:flex;align-items:flex-end;padding:10%;font-family:"Bebas Neue",sans-serif;font-size:20px;line-height:1;
+    background:linear-gradient(160deg,#2b3550,#121622)}
+  .skel{background:linear-gradient(90deg,var(--panel) 0%,var(--panel2) 50%,var(--panel) 100%);background-size:200% 100%;animation:sh 1.2s infinite}
+  @keyframes sh{to{background-position:-200% 0}}
+
+  /* start */
+  .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
+  .seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+  .matchup{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:22px 0 8px}
+  .matchup .lbl{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;text-align:center}
+  .matchup .name{font-weight:700;font-size:14px;margin-top:8px;text-align:center;line-height:1.25;min-height:36px}
+  .arrow{font-size:28px;color:var(--accent)}
+  .row{display:flex;gap:10px;margin-top:12px}
+  .row > *{flex:1}
+  .btn{padding:14px 16px;border-radius:12px;font-weight:700;font-size:16px;background:var(--panel2);border:1px solid var(--line)}
+  .btn.primary{background:var(--accent);color:#1a1300;border:0}
+  .btn:active{transform:scale(.98)}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .note{font-size:13px;color:var(--muted);text-align:center;margin-top:10px;min-height:18px}
+  .howto{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:18px;font-size:14px;color:var(--muted);line-height:1.5}
+  .howto b{color:var(--text)}
+  .credit{font-size:12px;color:var(--muted);margin-top:18px;line-height:1.5;text-align:center}
+  .err{background:#2a1517;border:1px solid #5a2a2e;color:#ffd5d5;border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px;line-height:1.45}
+
+  /* game */
+  .hud{position:sticky;top:0;z-index:5;background:rgba(13,15,20,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .hud-in{max-width:760px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:12px}
+  .goal{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+  .goal .poster{width:40px;border-radius:5px;flex:none}
+  .goal .t{min-width:0}
+  .k{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .goal .k{color:var(--accent)}
+  .goal .n{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stats{display:flex;gap:8px;flex:none}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px 9px;text-align:center;min-width:54px}
+  .stat .v{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .trail{display:flex;gap:6px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+  .trail::-webkit-scrollbar{display:none}
+  .chip{flex:none;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .chip.cur{color:#1a1300;background:var(--accent);border-color:var(--accent)}
+  .chip.sep{background:none;border:0;padding:5px 0;color:var(--line)}
+  .here{display:flex;gap:14px;align-items:flex-end;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
+  .here .poster{width:110px;flex:none}
+  .here .k{color:var(--muted)}
+  .here .n{font-weight:800;font-size:20px;line-height:1.2;margin-top:4px}
+  .here .m{color:var(--muted);font-size:14px;margin-top:4px}
+  h3{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(min-width:560px){.grid{grid-template-columns:repeat(4,1fr)}}
+  .card{text-align:left;transition:transform .12s}
+  .card:active{transform:scale(.96)}
+  .card .cn{font-size:13px;font-weight:600;margin-top:7px;line-height:1.25}
+  .card .cy{font-size:12px;color:var(--muted)}
+  .card.seen .poster{opacity:.4}
+  .card.seen .cn::after{content:" · visited";color:var(--muted);font-weight:500}
+  .card.isgoal .poster{box-shadow:0 0 0 3px var(--accent),0 0 22px rgba(255,200,61,.55)}
+  .card.isgoal .cn{color:var(--accent)}
+  .fade-in{animation:fi .25s ease}
+  @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(13,15,20,.95);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .bar-in{max-width:760px;margin:0 auto;display:flex;gap:10px}
+  .bar .btn{flex:1;padding:12px;font-size:15px}
+
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
+  @media(min-width:560px){.modal{align-items:center}}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:92vh;overflow:auto;padding:22px 18px calc(18px + env(safe-area-inset-bottom));animation:up .3s ease}
+  @media(min-width:560px){.sheet{border-radius:20px}}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .big{font-family:"Bebas Neue",sans-serif;font-size:44px;letter-spacing:1px;line-height:1;text-align:center}
+  .big.win{color:var(--accent)}
+  .msg{text-align:center;color:var(--muted);margin-top:6px;font-size:15px}
+  .scores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+  .scores .stat{padding:10px 6px}
+  .scores .stat .v{font-size:22px}
+  .pathlist{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .pathlist .chip{color:var(--text)}
+  .pathlist .chip.end{background:var(--accent);color:#1a1300;border-color:var(--accent)}
+  .sheet h3{margin:16px 0 8px}
+  .copied{font-size:13px;color:var(--good);text-align:center;min-height:18px;margin-top:8px}
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+  .confetti i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:fall linear forwards}
+  @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<section id="start" class="wrap">
+  <div class="logo">PLOT <span>TWIST</span></div>
+  <div class="sub">Get from one movie to another using only "More like this" links.</div>
+
+  <div class="seg" style="margin-top:18px" id="modeSeg">
+    <button data-mode="daily" class="on">Daily challenge</button>
+    <button data-mode="random">Random</button>
+  </div>
+  <div class="seg hidden" style="margin-top:8px" id="diffSeg">
+    <button data-diff="easy">Easy</button>
+    <button data-diff="medium" class="on">Medium</button>
+    <button data-diff="hard">Hard</button>
+  </div>
+
+  <div class="matchup">
+    <div><div class="lbl">Start</div><div id="sPoster"></div><div class="name" id="sName"></div></div>
+    <div class="arrow">→</div>
+    <div><div class="lbl">Goal</div><div id="tPoster"></div><div class="name" id="tName"></div></div>
+  </div>
+  <div class="note" id="note"></div>
+  <div id="errBox"></div>
+
+  <div class="row">
+    <button class="btn hidden" id="shuffleBtn">New pair</button>
+    <button class="btn primary" id="goBtn" disabled>Start ▶</button>
+  </div>
+
+  <div class="howto">
+    <b>How to play:</b> You start on the first movie. Tap any movie in its <b>More like this</b> list to hop there. Keep hopping until you land on the goal.<br><br>
+    The timer starts when you press Start. Every hop counts, and so does going back. <b>Par</b> is the number of hops in a route we know works. Beat it if you can!
+  </div>
+
+  <div class="credit">
+    Movie data and posters from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>.<br>
+    This product uses the TMDB API but is not endorsed or certified by TMDB.
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <div class="hud"><div class="hud-in">
+    <div class="goal"><div id="gPoster"></div><div class="t"><div class="k">Goal</div><div class="n" id="gName"></div></div></div>
+    <div class="stats">
+      <div class="stat"><div class="v" id="timer">0:00</div><div class="l">Time</div></div>
+      <div class="stat"><div class="v" id="hops">0</div><div class="l">Hops</div></div>
+      <div class="stat"><div class="v" id="par">0</div><div class="l">Par</div></div>
+    </div>
+  </div></div>
+  <div class="wrap" style="padding-top:4px">
+    <div class="trail" id="trail"></div>
+    <div class="here fade-in" id="here"></div>
+    <h3>More like this</h3>
+    <div class="grid" id="grid"></div>
+  </div>
+  <div class="bar"><div class="bar-in">
+    <button class="btn" id="undoBtn">↩ Back</button>
+    <button class="btn" id="quitBtn">Give up</button>
+  </div></div>
+</section>
+
+<div id="modal" class="modal hidden"><div class="sheet" id="sheet"></div></div>
+<div id="confetti" class="confetti"></div>
+
+<script>
+/* ================= TMDB ================= */
+const API = 'https://api.themoviedb.org/3';
+const IMG = 'https://image.tmdb.org/t/p/';
+const MOVIES = {};            // id -> {id,title,year,poster,rating}
+const REC_CACHE = {};         // id -> Promise<[ids]>
+const GRID_SIZE = 12;
+
+class ApiError extends Error { constructor(status) { super('TMDB ' + status); this.status = status; } }
+
+async function api(path, params = {}) {
+  const u = new URL(API + path);
+  u.searchParams.set('api_key', TMDB_KEY);
+  u.searchParams.set('language', 'en-US');
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  let r;
+  try { r = await fetch(u); } catch { throw new ApiError(0); }
+  if (!r.ok) throw new ApiError(r.status);
+  return r.json();
+}
+function keep(m) {
+  if (!MOVIES[m.id]) MOVIES[m.id] = {
+    id: m.id, title: m.title, year: (m.release_date || '').slice(0, 4),
+    poster: m.poster_path, rating: m.vote_average, votes: m.vote_count || 0
+  };
+  return MOVIES[m.id];
+}
+const usable = (m, minVotes) => !m.adult && m.poster_path && m.title && (m.vote_count || 0) >= minVotes;
+
+/* "More like this" list for a movie: TMDB recommendations, topped up with similar titles */
+function getRecs(id) {
+  if (!REC_CACHE[id]) REC_CACHE[id] = (async () => {
+    const rec = await api(`/movie/${id}/recommendations`);
+    let list = rec.results.filter(m => usable(m, 150) && m.id !== +id);
+    if (list.length < 6) {
+      const sim = await api(`/movie/${id}/similar`);
+      const have = new Set(list.map(m => m.id));
+      list = list.concat(sim.results.filter(m => usable(m, 150) && !have.has(m.id) && m.id !== +id));
+    }
+    if (list.length < 4) list = rec.results.filter(m => usable(m, 10) && m.id !== +id);
+    return list.slice(0, GRID_SIZE).map(m => keep(m).id);
+  })().catch(e => { delete REC_CACHE[id]; throw e; });
+  return REC_CACHE[id];
+}
+
+let POOL = null;
+async function getPool(daily) {
+  if (POOL && !daily) return POOL.all;
+  if (!POOL) {
+    const pages = await Promise.all([
+      ...[1, 2, 3, 4, 5].map(p => api('/movie/top_rated', { page: p })),
+      ...[1, 2, 3].map(p => api('/movie/popular', { page: p }))
+    ]);
+    const top = pages.slice(0, 5).flatMap(p => p.results).filter(m => usable(m, 3000)).map(m => keep(m).id);
+    const pop = pages.slice(5).flatMap(p => p.results).filter(m => usable(m, 1500)).map(m => keep(m).id);
+    POOL = { top, all: [...new Set([...top, ...pop])] };
+  }
+  return daily ? POOL.top : POOL.all;
+}
+
+/* ================= helpers ================= */
+function hashStr(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function todayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+function fmt(ms) { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+const $ = id => document.getElementById(id);
+
+function posterHTML(m, size = 'w342') {
+  if (!m) return `<div class="poster skel"></div>`;
+  if (!m.poster) return `<div class="poster"><div class="noimg">${esc(m.title)}</div></div>`;
+  return `<div class="poster"><img src="${IMG}${size}${m.poster}" alt="${esc(m.title)} poster" loading="lazy" onload="this.classList.add('ok')" onerror="this.parentNode.innerHTML='<div class=noimg>'+this.alt.replace(/ poster$/,'')+'</div>'"></div>`;
+}
+
+/* ================= challenge generation =================
+   Walk forward through real "More like this" lists so the goal is always reachable.
+   The walk length is par; the goal is never in the list of any earlier movie on the walk. */
+const STEPS = { easy: 2, medium: 3, hard: 5 };
+async function makeChallenge(rand, steps, daily) {
+  const pool = await getPool(daily);
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const start = pool[Math.floor(rand() * pool.length)];
+    const route = [start], near = new Set([start]);
+    let ok = true;
+    for (let i = 1; i <= steps; i++) {
+      const cur = route[route.length - 1];
+      const recs = await getRecs(cur);
+      let cands = recs.slice(0, 8).filter(id => !route.includes(id));
+      if (i === steps) cands = cands.filter(id => !near.has(id) && MOVIES[id].votes >= 500);
+      if (!cands.length) { ok = false; break; }
+      recs.forEach(id => near.add(id));
+      route.push(cands[Math.floor(rand() * cands.length)]);
+    }
+    if (ok) return { s: start, t: route[route.length - 1], route };
+  }
+  throw new Error('no challenge');
+}
+
+/* ================= game ================= */
+let S = { mode: 'daily', diff: 'medium', s: null, t: null, route: [], cur: null, path: [], hops: 0, t0: 0, tick: null, done: false, busy: false };
+let genToken = 0;
+
+function showError(e) {
+  let msg = 'Something went wrong talking to TMDB. Check your connection and try again.';
+  if (!TMDB_KEY) msg = 'No TMDB key yet. Open index.html and paste your key into the TMDB_KEY line near the top.';
+  else if (e && e.status === 401) msg = 'TMDB rejected the key. Double-check the TMDB_KEY line in index.html (use the "API Key", not the long Read Access Token).';
+  else if (e && e.status === 429) msg = 'TMDB says we are going too fast. Wait a few seconds and try again.';
+  $('errBox').innerHTML = `<div class="err">${esc(msg)}</div>`;
+}
+
+async function setPair() {
+  const my = ++genToken;
+  $('goBtn').disabled = true; $('shuffleBtn').disabled = true; $('errBox').innerHTML = '';
+  $('sPoster').innerHTML = posterHTML(null); $('tPoster').innerHTML = posterHTML(null);
+  $('sName').textContent = ''; $('tName').textContent = '';
+  $('note').textContent = 'Finding a challenge…';
+  $('shuffleBtn').classList.toggle('hidden', S.mode === 'daily');
+  $('diffSeg').classList.toggle('hidden', S.mode === 'daily');
+  if (!TMDB_KEY) { $('note').textContent = ''; return showError(); }
+  try {
+    const c = S.mode === 'daily'
+      ? await makeChallenge(rng(hashStr('moviehop-' + todayKey())), STEPS.medium, true)
+      : await makeChallenge(Math.random, STEPS[S.diff], false);
+    if (my !== genToken) return;
+    Object.assign(S, c); S.par = c.route.length - 1;
+    const sm = MOVIES[S.s], tm = MOVIES[S.t];
+    $('sPoster').innerHTML = posterHTML(sm); $('sName').textContent = `${sm.title} (${sm.year})`;
+    $('tPoster').innerHTML = posterHTML(tm); $('tName').textContent = `${tm.title} (${tm.year})`;
+    const best = store.get(pairKey());
+    $('note').textContent = (S.mode === 'daily' ? `Today's challenge · par ${S.par}` : `Par ${S.par} hops`) +
+      (best ? ` · Your best: ${best.hops} hops in ${fmt(best.ms)}` : '');
+    $('goBtn').disabled = false;
+    getRecs(S.s).catch(() => {});
+  } catch (e) {
+    if (my !== genToken) return;
+    $('note').textContent = ''; showError(e);
+  } finally {
+    if (my === genToken) $('shuffleBtn').disabled = false;
+  }
+}
+function pairKey() { return S.mode === 'daily' ? 'mh-daily-' + todayKey() : `mh-${S.s}-${S.t}`; }
+
+function startGame() {
+  S.cur = S.s; S.path = [S.s]; S.hops = 0; S.done = false; S.t0 = performance.now();
+  $('start').classList.add('hidden'); $('game').classList.remove('hidden');
+  $('gPoster').innerHTML = posterHTML(MOVIES[S.t], 'w92'); $('gName').textContent = MOVIES[S.t].title;
+  $('par').textContent = S.par; $('timer').textContent = '0:00';
+  clearInterval(S.tick); S.tick = setInterval(() => { $('timer').textContent = fmt(performance.now() - S.t0); }, 250);
+  renderGame(); window.scrollTo(0, 0);
+}
+
+async function renderGame() {
+  const m = MOVIES[S.cur];
+  $('hops').textContent = S.hops;
+  $('here').innerHTML = `${posterHTML(m)}<div><div class="k">You're on</div><div class="n">${esc(m.title)}</div><div class="m">${m.year}${m.rating ? ' · ★ ' + m.rating.toFixed(1) : ''}</div></div>`;
+  $('here').classList.remove('fade-in'); void $('here').offsetWidth; $('here').classList.add('fade-in');
+  const trail = $('trail');
+  trail.innerHTML = S.path.map((id, i) => `${i ? '<span class="chip sep">›</span>' : ''}<span class="chip ${i === S.path.length - 1 ? 'cur' : ''}">${esc(MOVIES[id].title)}</span>`).join('');
+  trail.scrollLeft = trail.scrollWidth;
+  $('undoBtn').disabled = S.path.length < 2;
+
+  const at = S.cur;
+  $('grid').innerHTML = Array.from({ length: 6 }, () => `<div class="card"><div class="poster skel"></div></div>`).join('');
+  S.busy = true;
+  let recs;
+  try { recs = await getRecs(at); }
+  catch (e) {
+    if (at !== S.cur) return;
+    S.busy = false;
+    $('grid').innerHTML = `<div class="err" style="grid-column:1/-1">Couldn't load this list. <button class="btn" style="margin-top:8px;padding:8px 12px;font-size:14px" onclick="renderGame()">Try again</button></div>`;
+    return;
+  }
+  if (at !== S.cur) return;
+  S.busy = false;
+  const seen = new Set(S.path);
+  $('grid').innerHTML = recs.length ? recs.map(id => {
+    const x = MOVIES[id];
+    return `<button class="card fade-in ${seen.has(id) ? 'seen' : ''} ${id === S.t ? 'isgoal' : ''}" data-id="${id}">${posterHTML(x)}<div class="cn">${esc(x.title)}</div><div class="cy">${x.year}</div></button>`;
+  }).join('') : `<div class="note" style="grid-column:1/-1">Dead end! TMDB has no suggestions for this one. Tap Back.</div>`;
+  // warm the cache for the next hop
+  recs.slice(0, 6).forEach(id => getRecs(id).catch(() => {}));
+}
+
+function hop(id) {
+  if (S.done || S.busy) return;
+  S.cur = id; S.path.push(id); S.hops++;
+  if (id === S.t) return win();
+  renderGame(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function undo() {
+  if (S.path.length < 2 || S.done) return;
+  S.path.pop(); S.cur = S.path[S.path.length - 1]; S.hops++;
+  renderGame();
+}
+function chips(path) {
+  return `<div class="pathlist">${path.map((id, i) => `${i ? '<span class="chip sep">›</span>' : ''}<span class="chip ${i === path.length - 1 ? 'end' : ''}">${esc(MOVIES[id].title)}</span>`).join('')}</div>`;
+}
+
+function win() {
+  S.done = true; clearInterval(S.tick);
+  const ms = performance.now() - S.t0;
+  $('hops').textContent = S.hops; $('timer').textContent = fmt(ms);
+  const key = pairKey(), best = store.get(key);
+  const newBest = !best || S.hops < best.hops || (S.hops === best.hops && ms < best.ms);
+  if (newBest) store.set(key, { hops: S.hops, ms });
+  const d = S.hops - S.par;
+  const verdict = d < 0 ? `Wow, you beat par by ${-d}!` : d === 0 ? 'Perfect run! You matched par.' : d === 1 ? 'Just one hop over par.' : `${d} hops over par.`;
+  const share = `🎬 Plot Twist${S.mode === 'daily' ? ' ' + todayKey() : ''}\n${MOVIES[S.s].title} → ${MOVIES[S.t].title}\n${S.hops} hops (par ${S.par}) in ${fmt(ms)}\n${location.href.split('#')[0]}`;
+  $('sheet').innerHTML = `
+    <div class="big win">You made it!</div>
+    <div class="msg">${verdict}${newBest && best ? ' New personal best!' : ''}</div>
+    <div class="scores">
+      <div class="stat"><div class="v">${fmt(ms)}</div><div class="l">Time</div></div>
+      <div class="stat"><div class="v">${S.hops}</div><div class="l">Hops</div></div>
+      <div class="stat"><div class="v">${S.par}</div><div class="l">Par</div></div>
+    </div>
+    <h3>Your route</h3>${chips(S.path)}
+    ${d > 0 ? `<h3>Par route</h3>${chips(S.route)}` : ''}
+    <div class="row" style="margin-top:20px">
+      <button class="btn" id="copyBtn">Copy result</button>
+      <button class="btn primary" id="againBtn">Play again</button>
+    </div>
+    <div class="copied" id="copied"></div>`;
+  $('modal').classList.remove('hidden');
+  $('copyBtn').onclick = async () => {
+    try {
+      if (navigator.share) await navigator.share({ text: share });
+      else { await navigator.clipboard.writeText(share); $('copied').textContent = 'Copied! Paste it to challenge a friend.'; }
+    } catch (e) {
+      try { await navigator.clipboard.writeText(share); $('copied').textContent = 'Copied! Paste it to challenge a friend.'; } catch {}
+    }
+  };
+  $('againBtn').onclick = backToStart;
+  confetti();
+}
+function giveUp() {
+  S.done = true; clearInterval(S.tick);
+  $('sheet').innerHTML = `
+    <div class="big">So close…</div>
+    <div class="msg">Here's a route that gets there in ${S.par} hops.</div>
+    <h3>Par route</h3>${chips(S.route)}
+    <h3>Your route so far</h3>${chips(S.path)}
+    <div class="row" style="margin-top:20px">
+      <button class="btn" id="retryBtn">Try again</button>
+      <button class="btn primary" id="againBtn">New game</button>
+    </div>`;
+  $('modal').classList.remove('hidden');
+  $('retryBtn').onclick = () => { $('modal').classList.add('hidden'); startGame(); };
+  $('againBtn').onclick = backToStart;
+}
+function backToStart() {
+  $('modal').classList.add('hidden'); $('game').classList.add('hidden'); $('start').classList.remove('hidden');
+  if (S.mode === 'random') setPair();
+  else { const best = store.get(pairKey()); $('note').textContent = `Today's challenge · par ${S.par}` + (best ? ` · Your best: ${best.hops} hops in ${fmt(best.ms)}` : ''); }
+  window.scrollTo(0, 0);
+}
+function confetti() {
+  const box = $('confetti'), cols = ['#ffc83d', '#ff6b4a', '#3ddc84', '#5ab8ff', '#c78bff'];
+  box.innerHTML = '';
+  for (let i = 0; i < 70; i++) {
+    const e = document.createElement('i');
+    e.style.left = Math.random() * 100 + 'vw';
+    e.style.background = cols[i % cols.length];
+    e.style.animationDuration = 1.6 + Math.random() * 1.6 + 's';
+    e.style.animationDelay = Math.random() * .4 + 's';
+    box.appendChild(e);
+  }
+  setTimeout(() => box.innerHTML = '', 3800);
+}
+
+/* ================= wiring ================= */
+$('modeSeg').onclick = e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.mode === S.mode) return;
+  [...$('modeSeg').children].forEach(x => x.classList.toggle('on', x === b));
+  S.mode = b.dataset.mode; setPair();
+};
+$('diffSeg').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  [...$('diffSeg').children].forEach(x => x.classList.toggle('on', x === b));
+  S.diff = b.dataset.diff; setPair();
+};
+$('shuffleBtn').onclick = setPair;
+$('goBtn').onclick = startGame;
+$('grid').onclick = e => { const c = e.target.closest('.card[data-id]'); if (c) hop(+c.dataset.id); };
+$('undoBtn').onclick = undo;
+$('quitBtn').onclick = giveUp;
+
+setPair();
+</script>
+</body>
+</html>
