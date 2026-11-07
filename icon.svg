@@ -19,11 +19,10 @@
     <rect x="22" y="46" width="34" height="20" rx="5"/><rect x="92" y="46" width="34" height="20" rx="5"/><rect x="162" y="46" width="34" height="20" rx="5"/><rect x="232" y="46" width="34" height="20" rx="5"/><rect x="302" y="46" width="34" height="20" rx="5"/><rect x="372" y="46" width="34" height="20" rx="5"/><rect x="442" y="46" width="34" height="20" rx="5"/>
     <rect x="22" y="446" width="34" height="20" rx="5"/><rect x="92" y="446" width="34" height="20" rx="5"/><rect x="162" y="446" width="34" height="20" rx="5"/><rect x="232" y="446" width="34" height="20" rx="5"/><rect x="302" y="446" width="34" height="20" rx="5"/><rect x="372" y="446" width="34" height="20" rx="5"/><rect x="442" y="446" width="34" height="20" rx="5"/>
   </g>
-  <!-- the twisting route: start dot, a loop, and an arrow to the goal -->
-  <g filter="url(#glow)" fill="none" stroke="url(#gold)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M128 368 C 190 368, 250 340, 262 282 C 276 214, 196 196, 190 254 C 184 318, 300 318, 346 196"/>
-    <path d="M300 204 L 352 176 L 376 232"/>
+  <!-- the route forms a P, with an arrow at each end -->
+  <g transform="translate(-14,-8)" filter="url(#glow)" fill="none" stroke="url(#gold)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M200 392 L200 140 Q200 122 218 122 L290 122 A80 80 0 0 1 290 282 L240 282"/>
+    <path d="M168 362 L200 396 L232 362"/>
+    <path d="M268 250 L234 282 L268 314"/>
   </g>
-  <circle cx="128" cy="368" r="30" fill="#ffffff"/>
-  <circle cx="128" cy="368" r="13" fill="#ff8a3d"/>
 </svg>
