@@ -1,28 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1f2533"/><stop offset="1" stop-color="#0b0d12"/>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#7a1645"/><stop offset=".55" stop-color="#3a0b2a"/><stop offset="1" stop-color="#14050f"/>
+    </radialGradient>
+    <linearGradient id="film" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe17a"/><stop offset=".5" stop-color="#ffb52e"/><stop offset="1" stop-color="#ff7a2e"/>
     </linearGradient>
-    <linearGradient id="gold" x1="0" y1="1" x2="1" y2="0">
-      <stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ffd23d"/>
+    <linearGradient id="filmBack" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d98a1f"/><stop offset="1" stop-color="#a8501a"/>
     </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
+    <!-- the two halves of the loop; each is an S through the centre -->
+    <path id="under" d="M436 256 C 436 346, 320 350, 256 256 C 192 162, 76 166, 76 256"/>
+    <path id="over"  d="M76 256 C 76 346, 192 350, 256 256 C 320 162, 436 166, 436 256"/>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <!-- film strip perforations top & bottom -->
-  <g fill="#ffffff" opacity=".10">
-    <rect x="0" y="34" width="512" height="44"/><rect x="0" y="434" width="512" height="44"/>
+  <!-- spotlight glow -->
+  <ellipse cx="256" cy="256" rx="200" ry="120" fill="#ffb52e" opacity=".18" filter="url(#soft)"/>
+
+  <!-- strand underneath (back of the film, a bit darker) -->
+  <g fill="none" stroke-linecap="butt">
+    <use href="#under" stroke="url(#filmBack)" stroke-width="78"/>
+    <use href="#under" stroke="#2a0a1c" stroke-width="64" stroke-dasharray="9 13"/>
+    <use href="#under" stroke="url(#filmBack)" stroke-width="46"/>
+    <use href="#under" stroke="#3a1020" stroke-width="38"/>
+    <use href="#under" stroke="url(#filmBack)" stroke-width="38" stroke-dasharray="4 30" opacity=".9"/>
   </g>
-  <g fill="#0b0d12" opacity=".9">
-    <rect x="22" y="46" width="34" height="20" rx="5"/><rect x="92" y="46" width="34" height="20" rx="5"/><rect x="162" y="46" width="34" height="20" rx="5"/><rect x="232" y="46" width="34" height="20" rx="5"/><rect x="302" y="46" width="34" height="20" rx="5"/><rect x="372" y="46" width="34" height="20" rx="5"/><rect x="442" y="46" width="34" height="20" rx="5"/>
-    <rect x="22" y="446" width="34" height="20" rx="5"/><rect x="92" y="446" width="34" height="20" rx="5"/><rect x="162" y="446" width="34" height="20" rx="5"/><rect x="232" y="446" width="34" height="20" rx="5"/><rect x="302" y="446" width="34" height="20" rx="5"/><rect x="372" y="446" width="34" height="20" rx="5"/><rect x="442" y="446" width="34" height="20" rx="5"/>
+  <!-- shadow cast by the top strand -->
+  <use href="#over" fill="none" stroke="#000" stroke-width="84" opacity=".55" filter="url(#shadow)"/>
+  <!-- strand on top (front of the film, bright) -->
+  <g fill="none" stroke-linecap="butt">
+    <use href="#over" stroke="url(#film)" stroke-width="78"/>
+    <use href="#over" stroke="#3a0b2a" stroke-width="64" stroke-dasharray="9 13"/>
+    <use href="#over" stroke="url(#film)" stroke-width="46"/>
+    <use href="#over" stroke="#4a1530" stroke-width="38"/>
+    <use href="#over" stroke="url(#film)" stroke-width="38" stroke-dasharray="4 30"/>
   </g>
-  <!-- the route forms a P, with an arrow at each end -->
-  <g transform="translate(-14,-8)" filter="url(#glow)" fill="none" stroke="url(#gold)" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M200 392 L200 140 Q200 122 218 122 L290 122 A80 80 0 0 1 290 282 L240 282"/>
-    <path d="M168 362 L200 396 L232 362"/>
-    <path d="M268 250 L234 282 L268 314"/>
-  </g>
+  <!-- sparkle -->
+  <path d="M412 72 l8 22 22 8 -22 8 -8 22 -8 -22 -22 -8 22 -8z" fill="#fff4cf"/>
+  <path d="M98 412 l5 13 13 5 -13 5 -5 13 -5 -13 -13 -5 13 -5z" fill="#fff4cf" opacity=".8"/>
 </svg>
