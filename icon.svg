@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <radialGradient id="bg" cx="50%" cy="38%" r="75%">
-      <stop offset="0" stop-color="#7a1645"/><stop offset=".55" stop-color="#3a0b2a"/><stop offset="1" stop-color="#14050f"/>
+      <stop offset="0" stop-color="#2a2418"/><stop offset=".55" stop-color="#0f0d0a"/><stop offset="1" stop-color="#000000"/>
     </radialGradient>
     <linearGradient id="film" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffe17a"/><stop offset=".5" stop-color="#ffb52e"/><stop offset="1" stop-color="#ff7a2e"/>
+      <stop offset="0" stop-color="#fff1b8"/><stop offset=".35" stop-color="#e8c25a"/><stop offset=".7" stop-color="#b8862b"/><stop offset="1" stop-color="#f3d47a"/>
     </linearGradient>
     <linearGradient id="filmBack" x1="1" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#d98a1f"/><stop offset="1" stop-color="#a8501a"/>
+      <stop offset="0" stop-color="#a77a26"/><stop offset="1" stop-color="#6e4c16"/>
     </linearGradient>
     <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
     <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
@@ -17,14 +17,14 @@
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
   <!-- spotlight glow -->
-  <ellipse cx="256" cy="256" rx="200" ry="120" fill="#ffb52e" opacity=".18" filter="url(#soft)"/>
+  <ellipse cx="256" cy="256" rx="200" ry="120" fill="#e8c25a" opacity=".14" filter="url(#soft)"/>
 
   <!-- strand underneath (back of the film, a bit darker) -->
   <g fill="none" stroke-linecap="butt">
     <use href="#under" stroke="url(#filmBack)" stroke-width="78"/>
-    <use href="#under" stroke="#2a0a1c" stroke-width="64" stroke-dasharray="9 13"/>
+    <use href="#under" stroke="#0a0806" stroke-width="64" stroke-dasharray="9 13"/>
     <use href="#under" stroke="url(#filmBack)" stroke-width="46"/>
-    <use href="#under" stroke="#3a1020" stroke-width="38"/>
+    <use href="#under" stroke="#15110b" stroke-width="38"/>
     <use href="#under" stroke="url(#filmBack)" stroke-width="38" stroke-dasharray="4 30" opacity=".9"/>
   </g>
   <!-- shadow cast by the top strand -->
@@ -32,12 +32,12 @@
   <!-- strand on top (front of the film, bright) -->
   <g fill="none" stroke-linecap="butt">
     <use href="#over" stroke="url(#film)" stroke-width="78"/>
-    <use href="#over" stroke="#3a0b2a" stroke-width="64" stroke-dasharray="9 13"/>
+    <use href="#over" stroke="#0a0806" stroke-width="64" stroke-dasharray="9 13"/>
     <use href="#over" stroke="url(#film)" stroke-width="46"/>
-    <use href="#over" stroke="#4a1530" stroke-width="38"/>
+    <use href="#over" stroke="#1c160d" stroke-width="38"/>
     <use href="#over" stroke="url(#film)" stroke-width="38" stroke-dasharray="4 30"/>
   </g>
   <!-- sparkle -->
-  <path d="M412 72 l8 22 22 8 -22 8 -8 22 -8 -22 -22 -8 22 -8z" fill="#fff4cf"/>
-  <path d="M98 412 l5 13 13 5 -13 5 -5 13 -5 -13 -13 -5 13 -5z" fill="#fff4cf" opacity=".8"/>
+  <path d="M412 72 l8 22 22 8 -22 8 -8 22 -8 -22 -22 -8 22 -8z" fill="#fff1b8"/>
+  <path d="M98 412 l5 13 13 5 -13 5 -5 13 -5 -13 -13 -5 13 -5z" fill="#fff1b8" opacity=".8"/>
 </svg>
