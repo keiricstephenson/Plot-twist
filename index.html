@@ -265,6 +265,9 @@ function posterHTML(m, size = 'w342') {
    Walk forward through real "More like this" lists so the goal is always reachable.
    The walk length is par; the goal is never in the list of any earlier movie on the walk. */
 const STEPS = { easy: 2, medium: 3, hard: 5 };
+/* Daily challenge: always par 5, 6 or 7, picked by the date */
+function dailySteps() { return 5 + Math.floor(rng(hashStr('daily-len-' + todayKey()))() * 3); }
+const DAILY_LABEL = { 5: 'Hard', 6: 'Very hard', 7: 'Brutal' };
 async function makeChallenge(rand, steps, daily) {
   const pool = await getPool(daily);
   for (let attempt = 0; attempt < 8; attempt++) {
@@ -308,7 +311,7 @@ async function setPair() {
   if (!TMDB_KEY) { $('note').textContent = ''; return showError(); }
   try {
     const c = S.mode === 'daily'
-      ? await makeChallenge(rng(hashStr('moviehop-' + todayKey())), STEPS.medium, true)
+      ? await makeChallenge(rng(hashStr('moviehop-' + todayKey())), dailySteps(), true)
       : await makeChallenge(Math.random, STEPS[S.diff], false);
     if (my !== genToken) return;
     Object.assign(S, c); S.par = c.route.length - 1;
@@ -316,7 +319,7 @@ async function setPair() {
     $('sPoster').innerHTML = posterHTML(sm); $('sName').textContent = `${sm.title} (${sm.year})`;
     $('tPoster').innerHTML = posterHTML(tm); $('tName').textContent = `${tm.title} (${tm.year})`;
     const best = store.get(pairKey());
-    $('note').textContent = (S.mode === 'daily' ? `Today's challenge · par ${S.par}` : `Par ${S.par} hops`) +
+    $('note').textContent = (S.mode === 'daily' ? `Today's challenge · ${DAILY_LABEL[S.par] || 'Hard'} · par ${S.par}` : `Par ${S.par} hops`) +
       (best ? ` · Your best: ${best.hops} hops in ${fmt(best.ms)}` : '');
     $('goBtn').disabled = false;
     getRecs(S.s).catch(() => {});
@@ -440,7 +443,7 @@ function giveUp() {
 function backToStart() {
   $('modal').classList.add('hidden'); $('game').classList.add('hidden'); $('start').classList.remove('hidden');
   if (S.mode === 'random') setPair();
-  else { const best = store.get(pairKey()); $('note').textContent = `Today's challenge · par ${S.par}` + (best ? ` · Your best: ${best.hops} hops in ${fmt(best.ms)}` : ''); }
+  else { const best = store.get(pairKey()); $('note').textContent = `Today's challenge · ${DAILY_LABEL[S.par] || 'Hard'} · par ${S.par}` + (best ? ` · Your best: ${best.hops} hops in ${fmt(best.ms)}` : ''); }
   window.scrollTo(0, 0);
 }
 function confetti() {
