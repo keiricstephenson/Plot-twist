@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0d0f14">
+<meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
@@ -22,17 +22,20 @@
 </script>
 <style>
   :root{
-    --bg:#0d0f14; --panel:#161a22; --panel2:#1d222c; --line:#2a303c;
-    --text:#f2f3f5; --muted:#9aa3b2; --accent:#ffc83d; --good:#3ddc84; --bad:#ff6b6b;
+    --bg:#000; --panel:#120f0a; --panel2:#1b170f; --line:#2e2618;
+    --text:#f6efdc; --muted:#a89c80; --accent:#e8c25a; --good:#e8c25a; --bad:#ff6b6b;
+    --gold:linear-gradient(135deg,#fff1b8 0%,#e8c25a 35%,#b8862b 75%,#f3d47a 100%);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  html,body{background:radial-gradient(ellipse at 50% -10%,#2a2418 0%,#000 55%) fixed,#000;color:var(--text);font-family:Inter,system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
   body{min-height:100vh}
   button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   a{color:var(--accent)}
   .wrap{max-width:760px;margin:0 auto;padding:16px 14px 100px;padding-top:max(16px,env(safe-area-inset-top))}
   .logo{font-family:"Bebas Neue",sans-serif;font-size:34px;letter-spacing:1.5px;line-height:1}
-  .logo span{color:var(--accent)}
+  .logo span{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand img{width:46px;height:46px;border-radius:11px;box-shadow:0 0 0 1px #3a2f1a,0 4px 14px rgba(232,194,90,.15)}
   .sub{color:var(--muted);font-size:14px;margin-top:4px}
 
   /* posters */
@@ -40,15 +43,15 @@
     box-shadow:0 6px 18px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08)}
   .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s}
   .poster img.ok{opacity:1}
-  .poster .noimg{position:absolute;inset:0;display:flex;align-items:flex-end;padding:10%;font-family:"Bebas Neue",sans-serif;font-size:20px;line-height:1;
-    background:linear-gradient(160deg,#2b3550,#121622)}
+  .poster .noimg{position:absolute;inset:0;display:flex;align-items:flex-end;padding:10%;font-family:"Bebas Neue",sans-serif;font-size:20px;line-height:1;color:var(--accent);
+    background:linear-gradient(160deg,#2a2418,#0a0806)}
   .skel{background:linear-gradient(90deg,var(--panel) 0%,var(--panel2) 50%,var(--panel) 100%);background-size:200% 100%;animation:sh 1.2s infinite}
   @keyframes sh{to{background-position:-200% 0}}
 
   /* start */
   .seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
   .seg button{flex:1;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted)}
-  .seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+  .seg button.on{background:var(--panel2);color:var(--accent);box-shadow:inset 0 0 0 1px #4a3b1e}
   .matchup{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:22px 0 8px}
   .matchup .lbl{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;text-align:center}
   .matchup .name{font-weight:700;font-size:14px;margin-top:8px;text-align:center;line-height:1.25;min-height:36px}
@@ -56,7 +59,7 @@
   .row{display:flex;gap:10px;margin-top:12px}
   .row > *{flex:1}
   .btn{padding:14px 16px;border-radius:12px;font-weight:700;font-size:16px;background:var(--panel2);border:1px solid var(--line)}
-  .btn.primary{background:var(--accent);color:#1a1300;border:0}
+  .btn.primary{background:var(--gold);color:#1a1205;border:0;box-shadow:0 4px 18px rgba(232,194,90,.25)}
   .btn:active{transform:scale(.98)}
   .btn:disabled{opacity:.4;pointer-events:none}
   .note{font-size:13px;color:var(--muted);text-align:center;margin-top:10px;min-height:18px}
@@ -66,7 +69,7 @@
   .err{background:#2a1517;border:1px solid #5a2a2e;color:#ffd5d5;border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px;line-height:1.45}
 
   /* game */
-  .hud{position:sticky;top:0;z-index:5;background:rgba(13,15,20,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+  .hud{position:sticky;top:0;z-index:5;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
   .hud-in{max-width:760px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:12px}
   .goal{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
   .goal .poster{width:40px;border-radius:5px;flex:none}
@@ -81,7 +84,7 @@
   .trail{display:flex;gap:6px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
   .trail::-webkit-scrollbar{display:none}
   .chip{flex:none;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-  .chip.cur{color:#1a1300;background:var(--accent);border-color:var(--accent)}
+  .chip.cur{color:#1a1205;background:var(--gold);border-color:transparent}
   .chip.sep{background:none;border:0;padding:5px 0;color:var(--line)}
   .here{display:flex;gap:14px;align-items:flex-end;margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px}
   .here .poster{width:110px;flex:none}
@@ -97,11 +100,11 @@
   .card .cy{font-size:12px;color:var(--muted)}
   .card.seen .poster{opacity:.4}
   .card.seen .cn::after{content:" · visited";color:var(--muted);font-weight:500}
-  .card.isgoal .poster{box-shadow:0 0 0 3px var(--accent),0 0 22px rgba(255,200,61,.55)}
+  .card.isgoal .poster{box-shadow:0 0 0 3px var(--accent),0 0 22px rgba(232,194,90,.55)}
   .card.isgoal .cn{color:var(--accent)}
   .fade-in{animation:fi .25s ease}
   @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(13,15,20,.95);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:rgba(0,0,0,.92);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
   .bar-in{max-width:760px;margin:0 auto;display:flex;gap:10px}
   .bar .btn{flex:1;padding:12px;font-size:15px}
 
@@ -112,14 +115,14 @@
   @media(min-width:560px){.sheet{border-radius:20px}}
   @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .big{font-family:"Bebas Neue",sans-serif;font-size:44px;letter-spacing:1px;line-height:1;text-align:center}
-  .big.win{color:var(--accent)}
+  .big.win{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
   .msg{text-align:center;color:var(--muted);margin-top:6px;font-size:15px}
   .scores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
   .scores .stat{padding:10px 6px}
   .scores .stat .v{font-size:22px}
   .pathlist{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
   .pathlist .chip{color:var(--text)}
-  .pathlist .chip.end{background:var(--accent);color:#1a1300;border-color:var(--accent)}
+  .pathlist .chip.end{background:var(--gold);color:#1a1205;border-color:transparent}
   .sheet h3{margin:16px 0 8px}
   .copied{font-size:13px;color:var(--good);text-align:center;min-height:18px;margin-top:8px}
   .confetti{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
@@ -131,7 +134,7 @@
 <body>
 
 <section id="start" class="wrap">
-  <div class="logo">PLOT <span>TWIST</span></div>
+  <div class="brand"><img src="icon-192.png" alt=""><div class="logo">PLOT <span>TWIST</span></div></div>
   <div class="sub">Get from one movie to another using only "More like this" links.</div>
 
   <div class="seg" style="margin-top:18px" id="modeSeg">
@@ -456,7 +459,7 @@ function backToStart() {
   window.scrollTo(0, 0);
 }
 function confetti() {
-  const box = $('confetti'), cols = ['#ffc83d', '#ff6b4a', '#3ddc84', '#5ab8ff', '#c78bff'];
+  const box = $('confetti'), cols = ['#fff1b8', '#e8c25a', '#b8862b', '#f3d47a', '#ffffff'];
   box.innerHTML = '';
   for (let i = 0; i < 70; i++) {
     const e = document.createElement('i');
